@@ -1,19 +1,36 @@
 const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
+const connectDb = require("./config/dbConnection");
+const dotenv = require("dotenv").config();
 
+
+const cors = require("cors");
+const UserModel = require("./models/Users");
+
+connectDb();
 const app = express();
+
+const port = process.env.PORT || 3000;
+
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect(
-  "mongodb+srv://admin:1234@freecluster.svqk0cb.mongodb.net/mern-db?retryWrites=true&w=majority"
-)
+app.get("/getUsers", (req, res) => {
+  UserModel.find({})
+    .then(function (users) {
+      res.json(users);
+    })
+    .catch(function (err) {
+      res.json(err);
+    });
+});
 
-app.get("/getUsers", (req, res)=>{
-  
-})
+app.post("/createUser", async (req, res) => {
+  const user = req.body;
+  const newUser = new UserModel(user);
+  await newUser.save();
+  res.json(user);
+});
 
-app.listen(3001, () => {
-  console.log("Server is Running");
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
